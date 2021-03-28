@@ -16,7 +16,6 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class LoginEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
     private String idCliente;
     @NotNull

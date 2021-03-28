@@ -10,6 +10,6 @@ public interface LoginRepository extends JpaRepository<LoginEntity,String> {
     boolean existsByUsuarioAndSenha(String usuario, String senha);
     boolean existsByUsuario(String usuario);
     boolean existsByIdCliente(String idCliente);
-    boolean deleteByIdCliente(String idCliente);
+    LoginEntity findByIdCliente(String idCliente);
 
 }

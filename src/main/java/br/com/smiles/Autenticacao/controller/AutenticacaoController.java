@@ -17,6 +17,7 @@ import javax.ws.rs.Path;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/login")
@@ -52,7 +53,7 @@ public class AutenticacaoController {
     private ResponseEntity<?> verificaSessao(@PathVariable(value = "idCliente") String idCliente,
                                              @RequestHeader(value = "token") String token) {
 
-        SessaoEntity sessaoEntity = sessaoRepository.findByIdCliente(idCliente);
+            SessaoEntity sessaoEntity = sessaoRepository.findByIdCliente(idCliente);
 
         if (token.equals(sessaoEntity.getToken())) {
             if (sessaoEntity.getTimeout().after(Timestamp.from(Instant.now()))) {
@@ -68,7 +69,7 @@ public class AutenticacaoController {
             }
 
         } else {
-            return ResponseEntity.status(403).body(Erro.builder().menssagem("Token inválido!").build());
+                return ResponseEntity.status(403).body(Erro.builder().menssagem("Token inválido!").build());
         }
     }
 
@@ -82,11 +83,11 @@ public class AutenticacaoController {
 
         } else {
             LoginEntity loginEntity = loginRepository.save(LoginEntity.builder()
-                    .idCliente(login.getIdCliente())
+                    .idCliente(UUID.randomUUID().toString())
                     .senha(login.getSenha())
                     .usuario(login.getUsuario())
                     .build());
-            return ResponseEntity.ok(login);
+            return ResponseEntity.ok(Login.builder().idCliente(loginEntity.getIdCliente()).senha(loginEntity.getSenha()).usuario(loginEntity.getUsuario()).build());
         }
     }
 
@@ -96,9 +97,6 @@ public class AutenticacaoController {
 
         if (loginRepository.existsByUsuario(login.getUsuario())) {
 
-            return ResponseEntity.status(400).body(Erro.builder().menssagem("Conta já existe!").build());
-
-        } else {
             LoginEntity loginEntity = loginRepository.save(LoginEntity.builder()
                     .idCliente(login.getIdCliente())
                     .senha(login.getSenha())
@@ -106,19 +104,38 @@ public class AutenticacaoController {
                     .build());
             return ResponseEntity.ok(login);
 
+        } else {
+
+            return ResponseEntity.status(404).body(Erro.builder().menssagem("Conta não existe!").build());
+
         }
     }
 
     @CrossOrigin(origins = "*")
-    @PatchMapping("/{idCliente}}")
+    @DeleteMapping("/{idCliente}")
     private ResponseEntity<?> deletarLogin(@PathVariable(value = "idCliente") String idCliente){
         if (loginRepository.existsByIdCliente(idCliente)) {
-
-            loginRepository.deleteByIdCliente(idCliente);
+            LoginEntity loginEntity = loginRepository.findByIdCliente(idCliente);
+            loginRepository.delete(loginEntity);
             return ResponseEntity.ok("Registro excluido com sucesso");
 
         } else {
             return ResponseEntity.status(400).body(Erro.builder().menssagem("Conta não existe!").build());
         }
+    }
+
+    @CrossOrigin(origins = "*")
+    @DeleteMapping("/sessao/{idCliente}")
+    private ResponseEntity<?> deletarSessao(@PathVariable(value = "idCliente") String idCliente){
+
+        if(sessaoRepository.existsById(idCliente)){
+            SessaoEntity sessaoEntity = sessaoRepository.findByIdCliente(idCliente);
+            sessaoEntity.setTimeout(Timestamp.from(Instant.now()));
+            sessaoRepository.save(sessaoEntity);
+            return ResponseEntity.ok("Sessão finalizada com sucesso!");
+        } else{
+            return ResponseEntity.status(404).body("Sessão não encontrada!");
+        }
+
     }
 }
