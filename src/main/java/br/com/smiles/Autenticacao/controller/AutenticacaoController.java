@@ -32,4 +32,11 @@ public class AutenticacaoController {
 
         return ResponseEntity.ok(Login.builder().idCliente(idCliente.getIdCliente()).Token("").build());
     }
+
+    @CrossOrigin(origins = "*")
+    @GetMapping("/teste")
+    private ResponseEntity<String> teste(){
+
+        return ResponseEntity.ok("Funcionando 8===D");
+    }
 }
