@@ -1,4 +1,4 @@
-package br.com.smiles.Autenticacao.controller.model.output;
+package br.com.smiles.Autenticacao.controller.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

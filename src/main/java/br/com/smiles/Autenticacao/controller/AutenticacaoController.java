@@ -1,7 +1,7 @@
 package br.com.smiles.Autenticacao.controller;
 
 import br.com.smiles.Autenticacao.controller.model.input.Login;
-import br.com.smiles.Autenticacao.controller.model.output.Erro;
+import br.com.smiles.Autenticacao.controller.utils.Erro;
 import br.com.smiles.Autenticacao.controller.model.output.Sessao;
 import br.com.smiles.Autenticacao.controller.utils.Token;
 import br.com.smiles.Autenticacao.integration.entity.LoginEntity;
@@ -12,9 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -49,15 +48,19 @@ public class AutenticacaoController {
     }
 
     @CrossOrigin(origins = "*")
-    @GetMapping("/sessao")
-    private ResponseEntity<?> verificaSessao(@RequestBody Sessao sessao) {
+    @GetMapping("/sessao/{idCliente}")
+    private ResponseEntity<?> verificaSessao(@PathVariable(value = "idCliente") String idCliente,
+                                             @RequestHeader(value = "token") String token) {
 
-        SessaoEntity sessaoEntity = sessaoRepository.findByIdCliente(sessao.getIdCliente());
+        SessaoEntity sessaoEntity = sessaoRepository.findByIdCliente(idCliente);
 
-        if (sessao.getToken().equals(sessaoEntity.getToken())) {
-            if (sessaoEntity.getTimeout().before(Timestamp.from(Instant.now()))) {
+        if (token.equals(sessaoEntity.getToken())) {
+            if (sessaoEntity.getTimeout().after(Timestamp.from(Instant.now()))) {
 
-                return ResponseEntity.ok(sessao);
+                return ResponseEntity.ok(Sessao.builder()
+                        .idCliente(sessaoEntity.getIdCliente())
+                        .token(sessaoEntity.getToken())
+                        .build());
             } else {
 
                 return ResponseEntity.status(401).body(Erro.builder().menssagem("Token expirado!").build());
@@ -103,6 +106,19 @@ public class AutenticacaoController {
                     .build());
             return ResponseEntity.ok(login);
 
+        }
+    }
+
+    @CrossOrigin(origins = "*")
+    @PatchMapping("/{idCliente}}")
+    private ResponseEntity<?> deletarLogin(@PathVariable(value = "idCliente") String idCliente){
+        if (loginRepository.existsByIdCliente(idCliente)) {
+
+            loginRepository.deleteByIdCliente(idCliente);
+            return ResponseEntity.ok("Registro excluido com sucesso");
+
+        } else {
+            return ResponseEntity.status(400).body(Erro.builder().menssagem("Conta não existe!").build());
         }
     }
 }
