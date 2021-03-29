@@ -147,7 +147,7 @@ public class AutenticacaoController {
     @PostMapping("/clienteId")
     private ResponseEntity<?> consultaClienteID(@RequestBody Login login) {
 
-        if(loginRepository.existsByUsuarioAndSenha(login.getUsuario(), login.getUsuario())){
+        if(loginRepository.existsByUsuarioAndSenha(login.getUsuario(), login.getSenha())){
             LoginEntity loginEntity = loginRepository.findByUsuarioAndSenha(login.getUsuario(), login.getUsuario());
             return ResponseEntity.ok(Login.builder()
                     .idCliente(loginEntity.getIdCliente())
