@@ -1,6 +1,7 @@
 package br.com.smiles.Autenticacao.controller;
 
 import br.com.smiles.Autenticacao.controller.model.input.Login;
+import br.com.smiles.Autenticacao.controller.model.output.Senha;
 import br.com.smiles.Autenticacao.controller.utils.Erro;
 import br.com.smiles.Autenticacao.controller.model.output.Sessao;
 import br.com.smiles.Autenticacao.controller.utils.Token;
@@ -8,6 +9,9 @@ import br.com.smiles.Autenticacao.integration.entity.LoginEntity;
 import br.com.smiles.Autenticacao.integration.entity.SessaoEntity;
 import br.com.smiles.Autenticacao.integration.repository.LoginRepository;
 import br.com.smiles.Autenticacao.integration.repository.SessaoRepository;
+import lombok.extern.java.Log;
+import org.apache.commons.codec.digest.Md5Crypt;
+import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -137,5 +141,31 @@ public class AutenticacaoController {
             return ResponseEntity.status(404).body("Sessão não encontrada!");
         }
 
+    }
+
+    @CrossOrigin(origins = "*")
+    @PostMapping("/clienteId")
+    private ResponseEntity<?> consultaClienteID(@RequestBody Login login) {
+
+        if(loginRepository.existsByUsuarioAndSenha(login.getUsuario(), login.getUsuario())){
+            LoginEntity loginEntity = loginRepository.findByUsuarioAndSenha(login.getUsuario(), login.getUsuario());
+            return ResponseEntity.ok(Login.builder()
+                    .idCliente(loginEntity.getIdCliente())
+                    .usuario(loginEntity.getUsuario())
+                    .senha(Md5Crypt.apr1Crypt(login.getSenha()))
+                    .build());
+        } else {
+            return ResponseEntity.status(404).body("Conta não encontrada!");
+        }
+    }
+
+    @CrossOrigin(origins = "*")
+    @GetMapping("/{senha}")
+    private ResponseEntity<?> encryptarSenha(@PathVariable(value = "senha")String senha){
+            if(senha.isEmpty()){
+                return ResponseEntity.status(400).body("String vazia!");
+            } else {
+                return ResponseEntity.ok(Senha.builder().senha(Md5Crypt.apr1Crypt(senha)).build());
+            }
     }
 }

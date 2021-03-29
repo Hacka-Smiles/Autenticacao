@@ -11,5 +11,6 @@ public interface LoginRepository extends JpaRepository<LoginEntity,String> {
     boolean existsByUsuario(String usuario);
     boolean existsByIdCliente(String idCliente);
     LoginEntity findByIdCliente(String idCliente);
+    LoginEntity findByUsuarioAndSenha(String usuario, String senha);
 
 }
