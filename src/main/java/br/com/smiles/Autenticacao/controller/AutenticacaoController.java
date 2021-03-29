@@ -152,7 +152,7 @@ public class AutenticacaoController {
             return ResponseEntity.ok(Login.builder()
                     .idCliente(loginEntity.getIdCliente())
                     .usuario(loginEntity.getUsuario())
-                    .senha(Md5Crypt.apr1Crypt(login.getSenha()))
+                    .senha(login.getSenha())
                     .build());
         } else {
             return ResponseEntity.status(404).body("Conta não encontrada!");
