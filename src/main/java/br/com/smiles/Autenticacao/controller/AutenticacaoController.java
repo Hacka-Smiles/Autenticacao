@@ -10,6 +10,7 @@ import br.com.smiles.Autenticacao.integration.entity.SessaoEntity;
 import br.com.smiles.Autenticacao.integration.repository.LoginRepository;
 import br.com.smiles.Autenticacao.integration.repository.SessaoRepository;
 import lombok.extern.java.Log;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -165,7 +167,7 @@ public class AutenticacaoController {
             if(senha.isEmpty()){
                 return ResponseEntity.status(400).body("String vazia!");
             } else {
-                return ResponseEntity.ok(Senha.builder().senha(Md5Crypt.apr1Crypt(senha)).build());
+                return ResponseEntity.ok(Senha.builder().senha(DigestUtils.md5Hex(senha)).build());
             }
     }
 }
