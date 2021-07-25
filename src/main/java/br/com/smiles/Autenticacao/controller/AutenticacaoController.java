@@ -38,15 +38,16 @@ public class AutenticacaoController {
     @PostMapping
     private ResponseEntity<?> iniciarSessao(@RequestBody Login login) {
         if (loginRepository.existsByUsuarioAndSenha(login.getUsuario(), login.getSenha())) {
+            String clienteId = loginRepository.findByUsuarioAndSenha(login.getUsuario(), login.getSenha()).getIdCliente();
 
             SessaoEntity sessaoEntity = sessaoRepository.save(SessaoEntity.builder()
-                    .idCliente(login.getIdCliente())
+                    .idCliente(clienteId)
                     .token(Token.generateNewToken())
                     .timeout(Timestamp.from(Instant.now().plus(30, ChronoUnit.MINUTES)))
                     .build());
 
             return ResponseEntity.ok(Sessao.builder()
-                    .idCliente(login.getIdCliente())
+                    .idCliente(clienteId)
                     .token(sessaoEntity.getToken())
                     .build());
         } else {
